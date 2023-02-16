@@ -17,7 +17,14 @@ function yearAndMonth(y, m) {
   else return [y, m - FY_START_MONTH + 12]
 }
 
+function showDates() {
+  document.getElementById('start').innerText = `Start date: ${START_DATE.toDateString()}`
+  document.getElementById('end').innerText = `End date: ${END_DATE.toDateString()}`
+}
+
 function constructPillar() {
+  showDates()
+
   const cells = document.querySelectorAll('.cell')
   // return early cus there are no cells
   if (!cells) return
