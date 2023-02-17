@@ -1,16 +1,17 @@
-const START_DATE = new Date(2022, 7, 1)
-const END_DATE = new Date(2025, 9, 1)
+const START_DATE = new Date(2022, 3, 1)
+const END_DATE = new Date(2025, 11, 1)
 
 const PILLAR_HEIGHT = 20 // pixels
 const PILLAR_COLOR = 'yellow'
 // we will have access to these in the code base normally
 const START_FY = 2022
 const END_FY = 2028
-const FY_START_MONTH = 7
+const FY_START_MONTH = 8 // new fy starts in september
 const MONTH_PERCENT = 100 / 11
-const DAY_PERCENT = MONTH_PERCENT / 31
+// TODO: calculate month specific percentage from a given date.
+const DAY_PERCENT = MONTH_PERCENT / 30
 
-function yearAndMonth(y, m) {
+function translateToFiscalYear(y, m) {
   // step back a year and adjust the month if its below sep
   if (m >= FY_START_MONTH) return [y + 1, m - FY_START_MONTH]
   // otherwise adjust fy month for the current fy
@@ -30,19 +31,22 @@ function constructPillar() {
   if (!cells) return
   // 1. figure out which cells to begin and end drawing in
   let startDateYear = START_DATE.getFullYear()
-  let endDateYear = END_DATE.getFullYear()
-  let endDateMonth = END_DATE.getMonth()
   let startDateMonth = START_DATE.getMonth()
 
-  let [startY, startM] = yearAndMonth(startDateYear, startDateMonth)
+  let endDateYear = END_DATE.getFullYear()
+  let endDateMonth = END_DATE.getMonth()
 
-  let [endY, endM] = yearAndMonth(endDateYear, endDateMonth)
+  let [startY, startM] = translateToFiscalYear(startDateYear, startDateMonth)
+
+  let [endY, endM] = translateToFiscalYear(endDateYear, endDateMonth)
 
   // this acts an an array index for the collection of "cell"s
   const startCellIndex = startY - START_FY
-  const endCellIndex = END_FY - endY + 1
+  const endCellIndex = cells.length - (END_FY - endY) - 1
 
   console.log(`start fiscal year: ${startY}\nend fiscal year: ${endY}`)
+
+  console.log(`END_FY: ${END_FY}\nendY: ${endY}\nendCellIndex: ${endCellIndex}`)
 
   // 2. calculate the width of the pillar for a given cell
   // interate though each year
@@ -58,6 +62,8 @@ function constructPillar() {
     // However, if we're handling the start or the end dates, we want to consider the month and day.
     let month = 0
     let day = 0
+
+    // positioning flags for edge segments
     let shouldRecievePosition = false
     let shouldFloatRight = false
 
@@ -67,7 +73,7 @@ function constructPillar() {
       day = START_DATE.getDate()
       shouldFloatRight = true
     }
-    else if (yearOffset === endCellIndex) {
+    else if (startY + yearOffset === endY) {
       month = endM
       day = END_DATE.getDate()
     }
@@ -85,6 +91,9 @@ function constructPillar() {
 
     // 2.3 draw each segment of the pillars in order
     drawSegment(cells[i], segmentWidth, shouldRecievePosition && shouldFloatRight)
+
+    console.log('is last segment:', startY + yearOffset === endY)
+    if (startY + yearOffset === endY) break
   }
   
 }
